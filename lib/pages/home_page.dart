@@ -1,9 +1,10 @@
+// import 'package:zebra_printer/data/zpl.dart';
+// import 'package:zebra_printer/utils/zebra_utility.dart';
+// import 'package:zebrautility/ZebraPrinter.dart';
 import 'package:flutter/material.dart';
 import 'package:socket_io/socket_io.dart';
-import 'package:zebra_printer/data/zpl.dart';
 import 'package:zebra_printer/services/socket_server_service.dart';
-import 'package:zebra_printer/utils/zebra_utility.dart';
-import 'package:zebrautility/ZebraPrinter.dart';
+import 'package:zebra_printer/services/zebra_printer_service.dart';
 
 class HomePage extends StatefulWidget {
   static final routeName = 'home';
@@ -13,15 +14,16 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late ZebraPrinter _zebraPrinter;
+  late ZebraPrinterService _zebraPrinter =
+      new ZebraPrinterService.withoutParameters();
   final SockerServerService _sockerServer =
       new SockerServerService.withoutParameters();
 
   @override
   void initState() {
     super.initState();
-    _sockerServer.createSocketServer();
-    eventsSocker();
+    _sockerServer.createSocketServer(this._zebraPrinter.socketEvent);
+    // eventsSocker();
   }
 
   @override
@@ -42,11 +44,11 @@ class _HomePageState extends State<HomePage> {
           children: [
             CustomButton(
               title: 'Conectarse',
-              onPressed: _initialize,
+              onPressed: _zebraPrinter.initialize,
             ),
             CustomButton(
               title: 'Imprimir',
-              onPressed: _printTest,
+              onPressed: null,
             ),
           ],
         ),
@@ -54,44 +56,50 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _initialize() async {
-    _zebraPrinter = await ZebraUtility.getPrinterInstance(
-        onPrinterFound: onPrinterFound,
-        onPrinterDiscoveryDone: onPrinterDiscoveryDone,
-        onChangePrinterStatus: onChangePrinterStatus,
-        onPermissionDenied: onPermissionDenied);
-    _zebraPrinter.discoveryPrinters();
-    _zebraPrinter.connectToPrinter("58:93:D8:31:04:C9");
-  }
+/*   void receiveEvent(Socket socket) {
+    print("id del cliente");
+    print(socket.id);
+    socket.on('print', (data) => _zebraPrinter.printTest());
+  } */
 
-  void _printTest() {
-    _zebraPrinter.print(testZPL);
-  }
+  // void _initialize() async {
+  //   _zebraPrinter = await ZebraUtility.getPrinterInstance(
+  //       onPrinterFound: onPrinterFound,
+  //       onPrinterDiscoveryDone: onPrinterDiscoveryDone,
+  //       onChangePrinterStatus: onChangePrinterStatus,
+  //       onPermissionDenied: onPermissionDenied);
+  //   _zebraPrinter.discoveryPrinters();
+  //   _zebraPrinter.connectToPrinter("58:93:D8:31:04:C9");
+  // }
 
-  dynamic onPrinterFound = (name, ipAddress, bool isWifi) {
-    print("PrinterFound :" + name + ipAddress);
-  };
+  // void _printTest() {
+  //   _zebraPrinter.print(testZPL);
+  // }
 
-  Function onPrinterDiscoveryDone = () {
-    print("Discovery Done");
-  };
+  // dynamic onPrinterFound = (name, ipAddress, bool isWifi) {
+  //   print("PrinterFound :" + name + ipAddress);
+  // };
 
-  dynamic onChangePrinterStatus = (status, color) {
-    print("change printer status: " + status + color);
-  };
+  // Function onPrinterDiscoveryDone = () {
+  //   print("Discovery Done");
+  // };
 
-  Function onPermissionDenied = () {
-    print("Permission Deny.");
-  };
+  // dynamic onChangePrinterStatus = (status, color) {
+  //   print("change printer status: " + status + color);
+  // };
 
-  void eventsSocker() {
-    Socket? client = _sockerServer.client;
-    if (client != null) client.on('print', _printFactura);
-  }
+  // Function onPermissionDenied = () {
+  //   print("Permission Deny.");
+  // };
 
-  dynamic _printFactura(dynamic data) {
-    _zebraPrinter.print(data);
-  }
+  // void eventsSocker() {
+  //   Socket? client = _sockerServer.client;
+  //   if (client != null) client.on('print', _printFactura);
+  // }
+
+  // dynamic _printFactura(dynamic data) {
+  //   _zebraPrinter.print(data);
+  // }
 }
 
 class CustomButton extends StatelessWidget {
